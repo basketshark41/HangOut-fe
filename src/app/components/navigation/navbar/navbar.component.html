@@ -1,0 +1,260 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo/Brand -->
+    <div class="navbar-brand">
+      <a routerLink="/" class="brand-link">
+        <i class="icon-calendar"></i>
+        <span class="brand-text">HangOut</span>
+      </a>
+    </div>
+
+    <!-- Main Navigation -->
+    <div class="navbar-nav">
+      <a routerLink="/" 
+         routerLinkActive="active" 
+         [routerLinkActiveOptions]="{exact: true}"
+         class="nav-link">
+        <i class="icon-home"></i>
+        <span class="nav-text">Home</span>
+      </a>
+      
+      <a routerLink="/events" 
+         routerLinkActive="active"
+         class="nav-link">
+        <i class="icon-calendar"></i>
+        <span class="nav-text">Eventi</span>
+      </a>
+      
+      <a routerLink="/friends" 
+         routerLinkActive="active"
+         class="nav-link">
+        <i class="icon-users"></i>
+        <span class="nav-text">Amici</span>
+        <span *ngIf="hasUnreadFriendRequests" class="notification-dot"></span>
+      </a>
+      
+      <a routerLink="/chat" 
+         routerLinkActive="active"
+         class="nav-link">
+        <i class="icon-message-circle"></i>
+        <span class="nav-text">Chat</span>
+        <span *ngIf="hasUnreadMessages" class="notification-dot"></span>
+      </a>
+      
+      <a routerLink="/notifications" 
+         routerLinkActive="active"
+         class="nav-link">
+        <i class="icon-bell"></i>
+        <span class="nav-text">Notifiche</span>
+        <span *ngIf="unreadNotificationsCount > 0" class="notification-badge">
+          {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+        </span>
+      </a>
+    </div>
+
+    <!-- User Menu (when authenticated) -->
+    <div *ngIf="isAuthenticated" class="navbar-user">
+      <div class="user-menu" [class.open]="isProfileMenuOpen">
+        <button (click)="toggleProfileMenu()" class="user-button">
+          <img [src]="currentUser?.profileImageUrl || '/assets/default-avatar.jpg'" 
+               [alt]="currentUser?.firstName"
+               class="user-avatar">
+          <span class="user-name">{{ currentUser?.firstName }}</span>
+          <i class="icon-chevron-down" [class.rotated]="isProfileMenuOpen"></i>
+        </button>
+        
+        <div class="user-dropdown" [class.show]="isProfileMenuOpen">
+          <div class="dropdown-header">
+            <img [src]="currentUser?.profileImageUrl || '/assets/default-avatar.jpg'" 
+                 [alt]="currentUser?.firstName"
+                 class="dropdown-avatar">
+            <div class="dropdown-user-info">
+              <strong>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</strong>
+              <p>{{ '@' + currentUser?.username }}</p>
+            </div>
+          </div>
+          
+          <div class="dropdown-divider"></div>
+          
+          <a routerLink="/profile" 
+             (click)="closeProfileMenu()"
+             class="dropdown-item">
+            <i class="icon-user"></i>
+            Il Mio Profilo
+          </a>
+          
+          <a routerLink="/events/my-events" 
+             (click)="closeProfileMenu()"
+             class="dropdown-item">
+            <i class="icon-calendar"></i>
+            I Miei Eventi
+          </a>
+          
+          <a routerLink="/settings" 
+             (click)="closeProfileMenu()"
+             class="dropdown-item">
+            <i class="icon-settings"></i>
+            Impostazioni
+          </a>
+          
+          <div class="dropdown-divider"></div>
+          
+          <button (click)="logout()" class="dropdown-item logout">
+            <i class="icon-log-out"></i>
+            Esci
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auth Buttons (when not authenticated) -->
+    <div *ngIf="!isAuthenticated" class="navbar-auth">
+      <a routerLink="/login" class="auth-btn login-btn">
+        <i class="icon-log-in"></i>
+        <span class="auth-text">Accedi</span>
+      </a>
+      <a routerLink="/register" class="auth-btn register-btn">
+        <i class="icon-user-plus"></i>
+        <span class="auth-text">Registrati</span>
+      </a>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+      <i class="icon-menu"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Navigation Overlay -->
+  <div class="mobile-nav-overlay" 
+       [class.show]="isMobileMenuOpen" 
+       (click)="closeMobileMenu()">
+    <div class="mobile-nav-menu" (click)="$event.stopPropagation()">
+      <div class="mobile-nav-header">
+        <img [src]="currentUser?.profileImageUrl || '/assets/default-avatar.jpg'" 
+             [alt]="currentUser?.firstName"
+             class="mobile-user-avatar">
+        <div class="mobile-user-info">
+          <strong>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</strong>
+          <p>{{ '@' + currentUser?.username }}</p>
+        </div>
+        <button (click)="closeMobileMenu()" class="close-btn">
+          <i class="icon-x"></i>
+        </button>
+      </div>
+      
+      <div class="mobile-nav-links">
+        <a routerLink="/" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="active" 
+           [routerLinkActiveOptions]="{exact: true}"
+           class="mobile-nav-link">
+          <i class="icon-home"></i>
+          Home
+        </a>
+        
+        <a routerLink="/events" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="active"
+           class="mobile-nav-link">
+          <i class="icon-calendar"></i>
+          Eventi
+        </a>
+        
+        <a routerLink="/friends" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="active"
+           class="mobile-nav-link">
+          <i class="icon-users"></i>
+          Amici
+          <span *ngIf="hasUnreadFriendRequests" class="notification-dot"></span>
+        </a>
+        
+        <a routerLink="/chat" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="active"
+           class="mobile-nav-link">
+          <i class="icon-message-circle"></i>
+          Chat
+          <span *ngIf="hasUnreadMessages" class="notification-dot"></span>
+        </a>
+        
+        <a routerLink="/notifications" 
+           (click)="closeMobileMenu()"
+           routerLinkActive="active"
+           class="mobile-nav-link">
+          <i class="icon-bell"></i>
+          Notifiche
+          <span *ngIf="unreadNotificationsCount > 0" class="notification-badge">
+            {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+          </span>
+        </a>
+      </div>
+      
+      <div class="mobile-nav-footer">
+        <!-- Authenticated user options -->
+        <div *ngIf="isAuthenticated">
+          <a routerLink="/profile" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-user"></i>
+            Profilo
+          </a>
+          
+          <a routerLink="/events/my-events" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-calendar"></i>
+            I Miei Eventi
+          </a>
+          
+          <a routerLink="/settings" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-settings"></i>
+            Impostazioni
+          </a>
+          
+                    <button (click)="logout()" class="mobile-nav-link logout">
+            <i class="icon-log-out"></i>
+            Esci
+          </button>
+        </div>
+
+        <!-- Non-authenticated user options -->
+        <div *ngIf="!isAuthenticated">
+          <a routerLink="/login" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-log-in"></i>
+            Accedi
+          </a>
+          
+          <a routerLink="/register" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-user-plus"></i>
+            Registrati
+          </a>
+        </div>
+        </div>
+
+        <!-- Non-authenticated user options -->
+        <div *ngIf="!isAuthenticated">
+          <a routerLink="/login" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-log-in"></i>
+            Accedi
+          </a>
+          
+          <a routerLink="/register" 
+             (click)="closeMobileMenu()"
+             class="mobile-nav-link">
+            <i class="icon-user-plus"></i>
+            Registrati
+          </a>
+        </div>
+      </div>
+    </div>
+</nav> 

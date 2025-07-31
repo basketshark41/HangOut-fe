@@ -1,0 +1,100 @@
+<div class="home-container">
+  <div class="dashboard-header">
+    <h1>Benvenuto su HangOut</h1>
+    <p>Scopri eventi interessanti e connettiti con i tuoi amici</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Caricamento...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-grid">
+    <!-- Upcoming Events Section -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>Prossimi Eventi</h2>
+        <a routerLink="/events" class="view-all-link">Vedi tutti</a>
+      </div>
+      <div class="events-list">
+        <div *ngFor="let event of upcomingEvents" class="event-item" (click)="navigateToEvent(event.eventId)">
+          <div class="event-image">
+            <img [src]="event.primaryImageUrl || '/assets/default-event.jpg'" [alt]="event.title">
+          </div>
+          <div class="event-info">
+            <h3>{{ event.title }}</h3>
+            <p class="event-date">{{ event.eventDate | date:'dd MMM yyyy, HH:mm' }}</p>
+            <p class="event-location">{{ event.locationName }}</p>
+            <p class="event-participants">{{ event.currentParticipants }}/{{ event.maxParticipants || '∞' }} partecipanti</p>
+          </div>
+        </div>
+        <div *ngIf="upcomingEvents.length === 0" class="empty-state">
+          <p>Nessun evento in programma</p>
+          <button routerLink="/events/create" class="btn btn-primary">Crea il tuo primo evento</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications Section -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>Notifiche Recenti</h2>
+        <a routerLink="/notifications" class="view-all-link">Vedi tutte</a>
+      </div>
+      <div class="notifications-list">
+        <div *ngFor="let notification of recentNotifications" 
+             class="notification-item" 
+             [class.unread]="!notification.isRead"
+             (click)="markNotificationAsRead(notification.notificationId)">
+          <div class="notification-icon">
+            <i [class]="'icon-' + (notification.iconName || 'bell')"></i>
+          </div>
+          <div class="notification-content">
+            <h4>{{ notification.title }}</h4>
+            <p>{{ notification.content }}</p>
+            <span class="notification-time">{{ notification.createdAt | date:'short' }}</span>
+          </div>
+        </div>
+        <div *ngIf="recentNotifications.length === 0" class="empty-state">
+          <p>Nessuna notifica</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Friends Activity Section -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>Attività Amici</h2>
+        <a routerLink="/friends" class="view-all-link">Gestisci amici</a>
+      </div>
+      <div class="friends-activity">
+        <div *ngFor="let activity of friendsActivity" class="activity-item">
+          <div class="activity-info">
+            <h4>{{ activity.title }}</h4>
+            <p>Organizzato da {{ activity.creatorName }}</p>
+            <p class="activity-date">{{ activity.eventDate | date:'dd MMM yyyy' }}</p>
+          </div>
+        </div>
+        <div *ngIf="friendsActivity.length === 0" class="empty-state">
+          <p>Nessuna attività recente dai tuoi amici</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button routerLink="/events/create" class="btn btn-primary">
+      <i class="icon-plus"></i>
+      Crea Evento
+    </button>
+    <button routerLink="/friends/search" class="btn btn-secondary">
+      <i class="icon-users"></i>
+      Trova Amici
+    </button>
+    <button routerLink="/chat" class="btn btn-secondary">
+      <i class="icon-message"></i>
+      Messaggi
+    </button>
+  </div>
+</div> 

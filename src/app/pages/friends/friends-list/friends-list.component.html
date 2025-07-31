@@ -1,0 +1,208 @@
+<div class="friends-container">
+  <div class="page-header">
+    <h1>I Miei Amici</h1>
+    <button routerLink="/friends/search" class="btn btn-primary">
+      <i class="icon-user-plus"></i>
+      Trova Amici
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button 
+      (click)="onTabChange('friends')"
+      [class.active]="activeTab === 'friends'"
+      class="tab-btn">
+      <i class="icon-users"></i>
+      Amici ({{ friends.length }})
+    </button>
+    <button 
+      (click)="onTabChange('pending')"
+      [class.active]="activeTab === 'pending'"
+      class="tab-btn">
+      <i class="icon-user-check"></i>
+      Richieste in arrivo ({{ pendingRequests.length }})
+    </button>
+    <button 
+      (click)="onTabChange('sent')"
+      [class.active]="activeTab === 'sent'"
+      class="tab-btn">
+      <i class="icon-user-clock"></i>
+      Richieste inviate ({{ sentRequests.length }})
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Cerca..." 
+        class="search-input"
+        (keyup.enter)="onSearch()">
+      <button (click)="onSearch()" class="search-btn">
+        <i class="icon-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Caricamento...</p>
+  </div>
+
+  <!-- Friends Tab -->
+  <div *ngIf="!loading && activeTab === 'friends'" class="friends-grid">
+    <div *ngFor="let friend of friends" class="friend-card">
+      <div class="friend-avatar">
+        <img [src]="friend.profileImageUrl || '/assets/default-avatar.jpg'" 
+             [alt]="friend.firstName">
+        <div class="online-indicator" [class.online]="friend.isOnline"></div>
+      </div>
+      
+      <div class="friend-info">
+        <h3>{{ friend.firstName }} {{ friend.lastName }}</h3>
+        <p class="username">{{ '@' + friend.username }}</p>
+        <p class="since">Amici dal {{ friend.friendsSince | date:'dd MMM yyyy' }}</p>
+        <span class="status" [class.online]="friend.isOnline">
+          {{ friend.isOnline ? 'Online' : 'Offline' }}
+        </span>
+      </div>
+      
+      <div class="friend-actions">
+        <button (click)="startConversation(friend.userId)" class="btn btn-sm btn-primary">
+          <i class="icon-message"></i>
+          Messaggio
+        </button>
+        <button routerLink="/users/{{friend.userId}}" class="btn btn-sm btn-outline">
+          <i class="icon-user"></i>
+          Profilo
+        </button>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline dropdown-toggle">
+            <i class="icon-more"></i>
+          </button>
+          <div class="dropdown-menu">
+            <button (click)="removeFriend(friend.friendshipId)" class="dropdown-item danger">
+              <i class="icon-user-minus"></i>
+              Rimuovi amico
+            </button>
+            <button (click)="blockUser(friend.friendshipId)" class="dropdown-item danger">
+              <i class="icon-block"></i>
+              Blocca utente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="friends.length === 0" class="empty-state">
+      <i class="icon-users"></i>
+      <h3>Nessun amico</h3>
+      <p>Inizia a connetterti con altre persone!</p>
+      <button routerLink="/friends/search" class="btn btn-primary">
+        Trova Amici
+      </button>
+    </div>
+  </div>
+
+  <!-- Pending Requests Tab -->
+  <div *ngIf="!loading && activeTab === 'pending'" class="requests-grid">
+    <div *ngFor="let request of pendingRequests" class="request-card">
+      <div class="requester-avatar">
+        <img [src]="request.requesterProfileImage || '/assets/default-avatar.jpg'" 
+             [alt]="request.requesterFirstName">
+      </div>
+      
+      <div class="requester-info">
+        <h3>{{ request.requesterFirstName }} {{ request.requesterLastName }}</h3>
+        <p class="username">{{ '@' + request.requesterUsername }}</p>
+        <p class="date">{{ request.requestDate | date:'dd MMM yyyy, HH:mm' }}</p>
+      </div>
+      
+      <div class="request-actions">
+        <button (click)="acceptFriendRequest(request.friendshipId)" 
+                class="btn btn-sm btn-success">
+          <i class="icon-check"></i>
+          Accetta
+        </button>
+        <button (click)="declineFriendRequest(request.friendshipId)" 
+                class="btn btn-sm btn-danger">
+          <i class="icon-x"></i>
+          Rifiuta
+        </button>
+        <button routerLink="/users/{{request.requesterId}}" 
+                class="btn btn-sm btn-outline">
+          <i class="icon-user"></i>
+          Profilo
+        </button>
+      </div>
+    </div>
+    
+    <div *ngIf="pendingRequests.length === 0" class="empty-state">
+      <i class="icon-user-check"></i>
+      <h3>Nessuna richiesta</h3>
+      <p>Non hai richieste di amicizia in attesa</p>
+    </div>
+  </div>
+
+  <!-- Sent Requests Tab -->
+  <div *ngIf="!loading && activeTab === 'sent'" class="requests-grid">
+    <div *ngFor="let request of sentRequests" class="request-card">
+      <div class="requester-avatar">
+        <img [src]="request.requesterProfileImage || '/assets/default-avatar.jpg'" 
+             [alt]="request.requesterFirstName">
+      </div>
+      
+      <div class="requester-info">
+        <h3>{{ request.requesterFirstName }} {{ request.requesterLastName }}</h3>
+        <p class="username">{{ '@' + request.requesterUsername }}</p>
+        <p class="date">Inviata il {{ request.requestDate | date:'dd MMM yyyy, HH:mm' }}</p>
+        <span class="status-badge" [class]="'status-' + request.status?.toLowerCase()">
+          {{ request.status }}
+        </span>
+      </div>
+      
+      <div class="request-actions">
+        <button routerLink="/users/{{request.requesterId}}" 
+                class="btn btn-sm btn-outline">
+          <i class="icon-user"></i>
+          Profilo
+        </button>
+      </div>
+    </div>
+    
+    <div *ngIf="sentRequests.length === 0" class="empty-state">
+      <i class="icon-user-clock"></i>
+      <h3>Nessuna richiesta inviata</h3>
+      <p>Non hai inviato richieste di amicizia</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalCount > pageSize" class="pagination">
+    <button 
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      class="page-btn">
+      <i class="icon-arrow-left"></i>
+    </button>
+    
+    <button 
+      *ngFor="let page of getPages()"
+      (click)="onPageChange(page)"
+      [class.active]="page === currentPage"
+      class="page-btn">
+      {{ page }}
+    </button>
+    
+    <button 
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="currentPage * pageSize >= totalCount"
+      class="page-btn">
+      <i class="icon-arrow-right"></i>
+    </button>
+  </div>
+</div> 

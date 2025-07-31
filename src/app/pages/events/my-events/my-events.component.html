@@ -1,0 +1,177 @@
+<div class="my-events-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">I Miei Eventi</h1>
+      <p class="page-subtitle">Gestisci e visualizza tutti i tuoi eventi</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/events/create" class="btn btn-primary">
+        <i class="icon-plus"></i>
+        Crea Nuovo Evento
+      </a>
+    </div>
+  </div>
+
+  <!-- Search and Sort -->
+  <div class="filters-section">
+    <div class="search-sort-container">
+      <!-- Search -->
+      <div class="search-group">
+        <div class="search-input-container">
+          <i class="icon-search search-icon"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+            placeholder="Cerca nei tuoi eventi..."
+            class="search-input">
+        </div>
+      </div>
+
+      <!-- Sort -->
+      <div class="sort-group">
+        <label for="sortBy">Ordina per:</label>
+        <select
+          id="sortBy"
+          [(ngModel)]="sortBy"
+          (change)="onSortChange()"
+          class="sort-select">
+          <option value="eventDate">Data Evento</option>
+          <option value="title">Titolo</option>
+          <option value="createdAt">Data Creazione</option>
+          <option value="currentParticipants">Partecipanti</option>
+        </select>
+
+        <label for="sortOrder">Ordine:</label>
+        <select
+          id="sortOrder"
+          [(ngModel)]="sortDescending"
+          (change)="onSortChange()"
+          class="sort-select">
+          <option [value]="false">Crescente</option>
+          <option [value]="true">Decrescente</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Caricamento eventi...</p>
+  </div>
+
+  <!-- No Events Message -->
+  <div *ngIf="!loading && events.length === 0" class="no-events">
+    <i class="icon-calendar-x"></i>
+    <h3>Nessun evento trovato</h3>
+    <p *ngIf="searchTerm">Nessun evento corrisponde alla tua ricerca "{{ searchTerm }}"</p>
+    <p *ngIf="!searchTerm">Non hai ancora creato nessun evento.</p>
+    <a routerLink="/events/create" class="btn btn-primary">
+      <i class="icon-plus"></i>
+      Crea il Tuo Primo Evento
+    </a>
+  </div>
+
+  <!-- Events Grid -->
+  <div *ngIf="!loading && events.length > 0" class="events-section">
+    <!-- Results Summary -->
+    <div class="results-summary">
+      Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ getMaxItem() }}
+      of {{ totalCount }} eventi
+    </div>
+
+    <!-- Events Grid -->
+    <div class="events-grid">
+      <div *ngFor="let event of events" class="event-card">
+        <div class="event-header">
+          <div class="event-status" [class]="event.status?.toLowerCase()">
+            {{ event.status || 'Bozza' }}
+          </div>
+          <div class="event-participants">
+            <i class="icon-users"></i>
+            {{ event.currentParticipants || 0 }}
+            <span *ngIf="event.maxParticipants">/{{ event.maxParticipants }}</span>
+          </div>
+        </div>
+
+        <div class="event-content">
+          <h3 class="event-title">
+            <a [routerLink]="['/events', event.eventId]">{{ event.title }}</a>
+          </h3>
+
+          <div class="event-details">
+            <div class="event-detail">
+              <i class="icon-calendar"></i>
+              <span>{{ event.eventDate | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+
+            <div *ngIf="event.locationName" class="event-detail">
+              <i class="icon-map-pin"></i>
+              <span>{{ event.locationName }}</span>
+            </div>
+
+            <div *ngIf="event.cost && event.cost > 0" class="event-detail">
+              <i class="icon-euro"></i>
+              <span>{{ event.cost }}{{ event.currency ? ' ' + event.currency : '' }}</span>
+            </div>
+
+            <div *ngIf="event.eventTypeName" class="event-detail">
+              <i class="icon-tag"></i>
+              <span>{{ event.eventTypeName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-actions">
+          <a routerLink="/events/{{event.eventId}}" class="btn btn-outline-primary btn-sm">
+            <i class="icon-eye"></i>
+            Visualizza
+          </a>
+          <a routerLink="/events/{{event.eventId}}/edit" class="btn btn-outline-secondary btn-sm">
+            <i class="icon-edit"></i>
+            Modifica
+          </a>
+          <a [routerLink]="['/events', event.eventId, 'participants']" class="btn btn-outline-info btn-sm">
+            <i class="icon-users"></i>
+            Partecipanti
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination-container">
+      <div class="pagination">
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="pagination-btn">
+          <i class="icon-chevron-left"></i>
+          Precedente
+        </button>
+
+        <button
+          *ngFor="let page of getPages()"
+          (click)="changePage(page)"
+          [class.active]="page === currentPage"
+          class="pagination-number">
+          {{ page }}
+        </button>
+
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+          class="pagination-btn">
+          Successivo
+          <i class="icon-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="pagination-info">
+        Pagina {{ currentPage }} di {{ totalPages }}
+      </div>
+    </div>
+  </div>
+</div> 

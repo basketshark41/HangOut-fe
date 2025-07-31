@@ -1,0 +1,231 @@
+<div class="edit-event-container">
+  <div class="edit-event-card">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Modifica Evento</h1>
+        <p *ngIf="event">{{ event.title }}</p>
+      </div>
+      <div class="header-actions">
+        <a [routerLink]="['/events', eventId]" class="btn btn-outline">
+          <i class="icon-arrow-left"></i>
+          Torna all'Evento
+        </a>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Caricamento evento...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !loading" class="error-message">
+      <i class="icon-alert-circle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Edit Form -->
+    <form *ngIf="!loading && event" [formGroup]="editForm" (ngSubmit)="onSubmit()" class="edit-form">
+      
+      <!-- Status Section -->
+      <div class="status-section">
+        <h3>Stato Evento</h3>
+        <div class="status-controls">
+          <div class="form-group">
+            <label for="status">Stato *</label>
+            <select 
+              id="status" 
+              formControlName="status" 
+              (change)="onStatusChange()"
+              class="form-select">
+              <option value="Draft">Bozza</option>
+              <option value="Published">Pubblicato</option>
+            </select>
+          </div>
+          
+          <div class="status-info">
+            <div *ngIf="isPublished" class="status-badge published">
+              <i class="icon-check-circle"></i>
+              Evento Pubblicato
+            </div>
+            <div *ngIf="!isPublished" class="status-badge draft">
+              <i class="icon-edit"></i>
+              Bozza
+            </div>
+            
+            <div *ngIf="!canPublish && !isPublished" class="publish-requirements">
+              <p><strong>Per pubblicare l'evento:</strong></p>
+              <ul>
+                <li>Tutti i campi obbligatori devono essere compilati</li>
+                <li>La data dell'evento deve essere nel futuro</li>
+              </ul>
+              <div *ngIf="publishErrorMessage" class="publish-error">
+                <i class="icon-alert-circle"></i>
+                {{ publishErrorMessage }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3>Informazioni Base</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="title">Titolo Evento *</label>
+            <input 
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Inserisci il titolo dell'evento"
+              [class.error]="isFieldInvalid('title')"
+              class="form-input">
+            <div *ngIf="isFieldInvalid('title')" class="field-error">
+              {{ getFieldError('title') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Descrizione *</label>
+          <textarea 
+            id="description"
+            formControlName="description"
+            placeholder="Descrivi il tuo evento..."
+            rows="4"
+            [class.error]="isFieldInvalid('description')"
+            class="form-textarea"></textarea>
+          <div *ngIf="isFieldInvalid('description')" class="field-error">
+            {{ getFieldError('description') }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="typeId">Tipo Evento</label>
+            <select 
+              id="typeId" 
+              formControlName="typeId"
+              class="form-select">
+              <option value="">Seleziona tipo</option>
+              <option *ngFor="let type of eventTypes" [value]="type.typeId">
+                {{ type.typeName }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date and Time -->
+      <div class="form-section">
+        <h3>Data e Ora</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventDate">Data Evento *</label>
+            <input 
+              id="eventDate"
+              type="date"
+              formControlName="eventDate"
+              [class.error]="isFieldInvalid('eventDate')"
+              class="form-input">
+            <div *ngIf="isFieldInvalid('eventDate')" class="field-error">
+              {{ getFieldError('eventDate') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="eventTime">Ora Evento *</label>
+            <input 
+              id="eventTime"
+              type="time"
+              formControlName="eventTime"
+              [class.error]="isFieldInvalid('eventTime')"
+              class="form-input">
+            <div *ngIf="isFieldInvalid('eventTime')" class="field-error">
+              {{ getFieldError('eventTime') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="form-section">
+        <h3>Località</h3>
+        
+        <div class="form-group">
+          <label for="locationName">Indirizzo/Località</label>
+          <input 
+            id="locationName"
+            type="text"
+            formControlName="locationName"
+            placeholder="Inserisci l'indirizzo o la località"
+            class="form-input">
+        </div>
+      </div>
+
+      <!-- Participants and Cost -->
+      <div class="form-section">
+        <h3>Partecipanti e Costi</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="maxParticipants">Numero Massimo Partecipanti</label>
+            <input 
+              id="maxParticipants"
+              type="number"
+              formControlName="maxParticipants"
+              placeholder="Illimitato"
+              min="1"
+              [class.error]="isFieldInvalid('maxParticipants')"
+              class="form-input">
+            <div *ngIf="isFieldInvalid('maxParticipants')" class="field-error">
+              {{ getFieldError('maxParticipants') }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="cost">Costo (€)</label>
+            <input 
+              id="cost"
+              type="number"
+              formControlName="cost"
+              placeholder="0"
+              min="0"
+              step="0.01"
+              [class.error]="isFieldInvalid('cost')"
+              class="form-input">
+            <div *ngIf="isFieldInvalid('cost')" class="field-error">
+              {{ getFieldError('cost') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button 
+          type="button" 
+          [routerLink]="['/events', eventId]"
+          class="btn btn-outline">
+          Annulla
+        </button>
+        
+        <button 
+          type="submit"
+          [disabled]="saving || editForm.invalid"
+          class="btn btn-primary">
+          <span *ngIf="!saving">Salva Modifiche</span>
+          <span *ngIf="saving" class="loading-content">
+            <i class="icon-loader spinning"></i>
+            Salvataggio...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

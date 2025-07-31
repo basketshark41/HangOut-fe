@@ -1,0 +1,202 @@
+<div class="event-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Caricamento evento...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage && !loading" class="error-state">
+    <i class="icon-alert-circle"></i>
+    <h3>Errore</h3>
+    <p>{{ errorMessage }}</p>
+    <a routerLink="/events" class="btn btn-primary">Torna agli Eventi</a>
+  </div>
+
+  <!-- Event Detail -->
+  <div *ngIf="!loading && event" class="event-detail">
+    <!-- Header -->
+    <div class="event-header">
+      <div class="event-image">
+        <img [src]="event.primaryImageUrl || '/assets/default-event.jpg'" [alt]="event.title">
+        <div class="event-status-badge" [class]="statusClass">
+          {{ statusText }}
+        </div>
+      </div>
+      
+      <div class="event-header-content">
+        <div class="event-meta">
+          <span class="event-type">{{ event.eventTypeName }}</span>
+          <span class="event-date">{{ formatDate(event.eventDate) }}</span>
+        </div>
+        
+        <h1 class="event-title">{{ event.title }}</h1>
+        
+        <div class="event-creator">
+          <img [src]="event.creatorProfileImageUrl || '/assets/default-avatar.jpg'" 
+               [alt]="event.creatorName"
+               class="creator-avatar">
+          <span>Creato da {{ event.creatorName }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="event-actions">
+          <button *ngIf="isAuthenticated" class="btn btn-primary">
+            <i class="icon-user-plus"></i>
+            Partecipa
+          </button>
+          
+          <a *ngIf="isEventCreator" 
+             [routerLink]="['/events', eventId, 'edit']" 
+             class="btn btn-outline">
+            <i class="icon-edit"></i>
+            Modifica Evento
+          </a>
+          
+          <button class="btn btn-outline">
+            <i class="icon-share"></i>
+            Condividi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Content -->
+    <div class="event-content">
+      <div class="event-main">
+        <!-- Description -->
+        <div class="event-section">
+          <h3>Descrizione</h3>
+          <p class="event-description">{{ event.description }}</p>
+        </div>
+
+        <!-- Details -->
+        <div class="event-section">
+          <h3>Dettagli Evento</h3>
+          <div class="event-details-grid">
+            <div class="detail-item">
+              <i class="icon-calendar"></i>
+              <div>
+                <strong>Data e Ora</strong>
+                <span>{{ formatDate(event.eventDate) }}</span>
+              </div>
+            </div>
+            
+            <div *ngIf="event.locationName" class="detail-item">
+              <i class="icon-map-pin"></i>
+              <div>
+                <strong>Località</strong>
+                <span>{{ event.locationName }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-item">
+              <i class="icon-users"></i>
+              <div>
+                <strong>Partecipanti</strong>
+                <span>{{ event.currentParticipants || 0 }}{{ event.maxParticipants ? '/' + event.maxParticipants : '' }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-item">
+              <i class="icon-euro"></i>
+              <div>
+                <strong>Costo</strong>
+                <span>{{ formatCost(event.cost, event.currency) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Participants -->
+        <div class="event-section">
+          <h3>Partecipanti</h3>
+          <div class="participants-list">
+            <div *ngIf="event.participations === 0" class="no-participants">
+              <i class="icon-users"></i>
+              <p>Nessun partecipante ancora</p>
+              <button *ngIf="isAuthenticated" class="btn btn-primary">
+                Sii il primo a partecipare!
+              </button>
+            </div>
+            
+            <div *ngIf="event.participations.length > 0" class="participants-grid">
+              <!-- Participant cards would go here -->
+              <div class="participant-card" *ngFor="let participant of event.participations">
+                <div class="participant-info">
+                  <span class="participant-name">{{ participant.name }}</span>
+                  <span class="participant-role">{{ participant.role }}</span>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="event-sidebar">
+        <!-- Quick Actions -->
+        <div class="sidebar-section">
+          <h4>Azioni Rapide</h4>
+          <div class="quick-actions">
+            <button *ngIf="isAuthenticated" class="btn btn-primary btn-full">
+              <i class="icon-user-plus"></i>
+              Partecipa all'Evento
+            </button>
+            
+            <button class="btn btn-outline btn-full">
+              <i class="icon-heart"></i>
+              Salva nei Preferiti
+            </button>
+            
+            <button class="btn btn-outline btn-full">
+              <i class="icon-share"></i>
+              Condividi Evento
+            </button>
+          </div>
+        </div>
+
+        <!-- Event Info -->
+        <div class="sidebar-section">
+          <h4>Informazioni Evento</h4>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">Stato:</span>
+              <span class="info-value" [class]="statusClass">{{ statusText }}</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Creato il:</span>
+              <span class="info-value">{{ event.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+            
+            <div *ngIf="event.updatedAt" class="info-item">
+              <span class="info-label">Aggiornato il:</span>
+              <span class="info-value">{{ event.updatedAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Creator Actions -->
+        <div *ngIf="isEventCreator" class="sidebar-section">
+          <h4>Gestione Evento</h4>
+          <div class="creator-actions">
+            <a [routerLink]="['/events', eventId, 'edit']" class="btn btn-outline btn-full">
+              <i class="icon-edit"></i>
+              Modifica Evento
+            </a>
+            
+            <a [routerLink]="['/events', eventId, 'participants']" class="btn btn-outline btn-full">
+              <i class="icon-users"></i>
+              Gestisci Partecipanti
+            </a>
+            
+            <button class="btn btn-outline btn-full btn-danger">
+              <i class="icon-trash"></i>
+              Cancella Evento
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

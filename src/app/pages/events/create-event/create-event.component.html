@@ -1,0 +1,177 @@
+<div class="create-event-container">
+  <div class="page-header">
+    <button (click)="goBack()" class="back-btn">
+      <i class="icon-arrow-left"></i>
+      Indietro
+    </button>
+    <h1>Crea Nuovo Evento</h1>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Caricamento...</p>
+  </div>
+
+  <form *ngIf="!loading" (ngSubmit)="onSubmit()" class="event-form">
+    <div class="form-grid">
+      <!-- Basic Info -->
+      <div class="form-section">
+        <h2>Informazioni Base</h2>
+        
+        <div class="form-group">
+          <label for="title">Titolo Evento *</label>
+          <input 
+            type="text" 
+            id="title"
+            [(ngModel)]="eventForm.title"
+            name="title"
+            placeholder="Inserisci il titolo dell'evento"
+            class="form-input"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Descrizione</label>
+          <textarea 
+            id="description"
+            [(ngModel)]="eventForm.description"
+            name="description"
+            placeholder="Descrivi il tuo evento..."
+            rows="4"
+            class="form-textarea"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="typeId">Tipo Evento</label>
+          <select 
+            id="typeId"
+            [(ngModel)]="eventForm.typeId"
+            name="typeId"
+            class="form-select">
+            <option value="0">Seleziona tipo evento (opzionale)</option>
+            <option *ngFor="let type of eventTypes" [value]="type.typeId">
+              {{ type.typeName }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Date & Time -->
+      <div class="form-section">
+        <h2>Data e Orario</h2>
+        
+        <div class="form-group">
+          <label for="eventDate">Data e Ora Evento *</label>
+          <input 
+            type="datetime-local" 
+            id="eventDate"
+            [(ngModel)]="eventForm.eventDate"
+            name="eventDate"
+            class="form-input"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="registrationDeadline">Scadenza Iscrizioni</label>
+          <input 
+            type="datetime-local" 
+            id="registrationDeadline"
+            [(ngModel)]="eventForm.registrationDeadline"
+            name="registrationDeadline"
+            class="form-input">
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="form-section">
+        <h2>Località</h2>
+        
+        <div class="form-group">
+          <label for="locationName">Indirizzo/Località</label>
+          <input 
+            type="text" 
+            id="locationName"
+            [(ngModel)]="eventForm.locationName"
+            name="locationName"
+            placeholder="Inserisci l'indirizzo dell'evento (opzionale)"
+            class="form-input">
+        </div>
+      </div>
+
+      <!-- Event Details -->
+      <div class="form-section">
+        <h2>Dettagli Evento</h2>
+        
+        <div class="form-group">
+          <label for="maxParticipants">Numero Massimo Partecipanti</label>
+          <input 
+            type="number" 
+            id="maxParticipants"
+            [(ngModel)]="eventForm.maxParticipants"
+            name="maxParticipants"
+            min="1"
+            placeholder="Lascia vuoto per illimitato"
+            class="form-input">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cost">Costo</label>
+            <input 
+              type="number" 
+              id="cost"
+              [(ngModel)]="eventForm.cost"
+              name="cost"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="currency">Valuta</label>
+            <select 
+              id="currency"
+              [(ngModel)]="eventForm.currency"
+              name="currency"
+              class="form-select">
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="additionalInfo">Informazioni Aggiuntive</label>
+          <textarea 
+            id="additionalInfo"
+            [(ngModel)]="eventForm.additionalInfo"
+            name="additionalInfo"
+            placeholder="Aggiungi altre informazioni utili..."
+            rows="3"
+            class="form-textarea"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button type="button" (click)="goBack()" class="btn btn-outline">
+        Annulla
+      </button>
+      <button 
+        type="submit" 
+        [disabled]="!isFormValid() || submitting"
+        class="btn btn-primary">
+        <span *ngIf="submitting">
+          <i class="icon-spinner spinning"></i>
+          Creazione...
+        </span>
+        <span *ngIf="!submitting">
+          <i class="icon-plus"></i>
+          Crea Evento
+        </span>
+      </button>
+    </div>
+  </form>
+</div> 

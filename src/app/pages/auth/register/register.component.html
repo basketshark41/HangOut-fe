@@ -1,0 +1,302 @@
+<div class="register-container">
+  <div class="register-card">
+    <!-- Header -->
+    <div class="register-header">
+      <div class="logo">
+        <h1>HangOut</h1>
+        <p>Crea il tuo account e inizia a partecipare</p>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <h2>Crea il tuo account</h2>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="icon-alert-circle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="form-sections">
+        <!-- Account Information Section -->
+        <div class="form-section">
+          <h3>Informazioni Account</h3>
+
+          <!-- Username Field -->
+          <div class="form-group">
+            <label for="username">Username *</label>
+            <div class="input-container">
+              <i class="icon-user input-icon"></i>
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                placeholder="Scegli un username unico"
+                [class.error]="isFieldInvalid('username') || getUsernameStatus() === 'taken'"
+                [class.success]="getUsernameStatus() === 'available'"
+                autocomplete="username">
+              
+              <!-- Username status indicator -->
+              <div class="status-indicator" *ngIf="getUsernameStatus()">
+                <i *ngIf="getUsernameStatus() === 'checking'" class="icon-loader spinning"></i>
+                <i *ngIf="getUsernameStatus() === 'available'" class="icon-check-circle success"></i>
+                <i *ngIf="getUsernameStatus() === 'taken'" class="icon-x-circle error"></i>
+              </div>
+            </div>
+            <div *ngIf="isFieldInvalid('username')" class="field-error">
+              {{ getFieldError('username') }}
+            </div>
+            <div *ngIf="getUsernameStatus() === 'taken'" class="field-error">
+              Questo username è già in uso
+            </div>
+            <div *ngIf="getUsernameStatus() === 'available'" class="field-success">
+              Username disponibile!
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <div class="input-container">
+              <i class="icon-mail input-icon"></i>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="inserisci@example.com"
+                [class.error]="isFieldInvalid('email') || getEmailStatus() === 'taken'"
+                [class.success]="getEmailStatus() === 'available'"
+                autocomplete="email">
+              
+              <!-- Email status indicator -->
+              <div class="status-indicator" *ngIf="getEmailStatus()">
+                <i *ngIf="getEmailStatus() === 'checking'" class="icon-loader spinning"></i>
+                <i *ngIf="getEmailStatus() === 'available'" class="icon-check-circle success"></i>
+                <i *ngIf="getEmailStatus() === 'taken'" class="icon-x-circle error"></i>
+              </div>
+            </div>
+            <div *ngIf="isFieldInvalid('email')" class="field-error">
+              {{ getFieldError('email') }}
+            </div>
+            <div *ngIf="getEmailStatus() === 'taken'" class="field-error">
+              Questa email è già registrata
+            </div>
+            <div *ngIf="getEmailStatus() === 'available'" class="field-success">
+              Email disponibile!
+            </div>
+          </div>
+
+          <!-- Password Fields Row -->
+          <div class="form-row">
+            <!-- Password Field -->
+            <div class="form-group">
+              <label for="password">Password *</label>
+              <div class="input-container">
+                <i class="icon-lock input-icon"></i>
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Almeno 6 caratteri"
+                  [class.error]="isFieldInvalid('password')"
+                  autocomplete="new-password">
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="togglePasswordVisibility()"
+                  aria-label="Toggle password visibility">
+                  <i [class]="showPassword ? 'icon-eye-off' : 'icon-eye'"></i>
+                </button>
+              </div>
+              <div *ngIf="isFieldInvalid('password')" class="field-error">
+                {{ getFieldError('password') }}
+              </div>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="form-group">
+              <label for="confirmPassword">Conferma Password *</label>
+              <div class="input-container">
+                <i class="icon-lock input-icon"></i>
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Ripeti la password"
+                  [class.error]="isFieldInvalid('confirmPassword') || (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched)"
+                  autocomplete="new-password">
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="toggleConfirmPasswordVisibility()"
+                  aria-label="Toggle confirm password visibility">
+                  <i [class]="showConfirmPassword ? 'icon-eye-off' : 'icon-eye'"></i>
+                </button>
+              </div>
+              <div *ngIf="isFieldInvalid('confirmPassword') || (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched)" class="field-error">
+                {{ getFieldError('confirmPassword') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <h3>Informazioni Personali</h3>
+
+          <!-- Name Fields Row -->
+          <div class="form-row">
+            <!-- First Name Field -->
+            <div class="form-group">
+              <label for="firstName">Nome *</label>
+              <div class="input-container">
+                <i class="icon-user input-icon"></i>
+                <input
+                  id="firstName"
+                  type="text"
+                  formControlName="firstName"
+                  placeholder="Il tuo nome"
+                  [class.error]="isFieldInvalid('firstName')"
+                  autocomplete="given-name">
+              </div>
+              <div *ngIf="isFieldInvalid('firstName')" class="field-error">
+                {{ getFieldError('firstName') }}
+              </div>
+            </div>
+
+            <!-- Last Name Field -->
+            <div class="form-group">
+              <label for="lastName">Cognome *</label>
+              <div class="input-container">
+                <i class="icon-user input-icon"></i>
+                <input
+                  id="lastName"
+                  type="text"
+                  formControlName="lastName"
+                  placeholder="Il tuo cognome"
+                  [class.error]="isFieldInvalid('lastName')"
+                  autocomplete="family-name">
+              </div>
+              <div *ngIf="isFieldInvalid('lastName')" class="field-error">
+                {{ getFieldError('lastName') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio Field -->
+          <div class="form-group">
+            <label for="bio">Biografia (opzionale)</label>
+            <div class="input-container">
+              <i class="icon-edit-3 input-icon"></i>
+              <textarea
+                id="bio"
+                formControlName="bio"
+                placeholder="Parlaci di te... (massimo 500 caratteri)"
+                rows="3"
+                [class.error]="isFieldInvalid('bio')"></textarea>
+            </div>
+            <div class="character-count">
+              {{ registerForm.get('bio')?.value?.length || 0 }}/500
+            </div>
+            <div *ngIf="isFieldInvalid('bio')" class="field-error">
+              {{ getFieldError('bio') }}
+            </div>
+          </div>
+
+          <!-- Contact Info Row -->
+          <div class="form-row">
+            <!-- Phone Field -->
+            <div class="form-group">
+              <label for="phoneNumber">Telefono (opzionale)</label>
+              <div class="input-container">
+                <i class="icon-phone input-icon"></i>
+                <input
+                  id="phoneNumber"
+                  type="tel"
+                  formControlName="phoneNumber"
+                  placeholder="+39 123 456 7890"
+                  [class.error]="isFieldInvalid('phoneNumber')"
+                  autocomplete="tel">
+              </div>
+              <div *ngIf="isFieldInvalid('phoneNumber')" class="field-error">
+                {{ getFieldError('phoneNumber') }}
+              </div>
+            </div>
+
+            <!-- Date of Birth Field -->
+            <div class="form-group">
+              <label for="dateOfBirth">Data di Nascita (opzionale)</label>
+              <div class="input-container">
+                <i class="icon-calendar input-icon"></i>
+                <input
+                  id="dateOfBirth"
+                  type="date"
+                  formControlName="dateOfBirth"
+                  [class.error]="isFieldInvalid('dateOfBirth')"
+                  autocomplete="bday">
+              </div>
+              <div *ngIf="isFieldInvalid('dateOfBirth')" class="field-error">
+                {{ getFieldError('dateOfBirth') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="acceptTerms"
+            [class.error]="isFieldInvalid('acceptTerms')">
+          <span class="checkmark"></span>
+          <span class="checkbox-text">
+            Accetto i <a href="#" class="terms-link">Termini e Condizioni</a> 
+            e la <a href="#" class="terms-link">Privacy Policy</a> *
+          </span>
+        </label>
+        <div *ngIf="isFieldInvalid('acceptTerms')" class="field-error">
+          {{ getFieldError('acceptTerms') }}
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="register-btn"
+        [disabled]="loading || registerForm.invalid || !usernameAvailable || !emailAvailable">
+        <span *ngIf="!loading">Crea Account</span>
+        <span *ngIf="loading" class="loading-content">
+          <i class="icon-loader spinning"></i>
+          Creazione account...
+        </span>
+      </button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>oppure</span>
+      </div>
+
+      <!-- Login Link -->
+      <div class="login-link">
+        <p>Hai già un account?
+          <a routerLink="/login" class="login-btn">Accedi</a>
+        </p>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="register-footer">
+      <p>&copy; 2024 HangOut. Tutti i diritti riservati.</p>
+    </div>
+  </div>
+
+  <!-- Background Decoration -->
+  <div class="background-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+  </div>
+</div> 

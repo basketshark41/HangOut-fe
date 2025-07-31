@@ -1,0 +1,132 @@
+<div class="conversations-container">
+  <div class="page-header">
+    <h1>Messaggi</h1>
+    <button routerLink="/friends" class="btn btn-primary">
+      <i class="icon-user-plus"></i>
+      Nuova Chat
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        placeholder="Cerca conversazioni..." 
+        class="search-input"
+        (keyup.enter)="onSearch()">
+      <button (click)="onSearch()" class="search-btn">
+        <i class="icon-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Caricamento conversazioni...</p>
+  </div>
+
+  <!-- Conversations List -->
+  <div *ngIf="!loading" class="conversations-list">
+    <div *ngFor="let conversation of conversations" 
+         class="conversation-item"
+         [class.unread]="conversation.unreadMessagesCount > 0"
+         routerLink="/chat/{{conversation.conversationId}}">
+      
+      <div class="conversation-avatar">
+        <img [src]="conversation.imageUrl || '/assets/default-avatar.jpg'" 
+             [alt]="getConversationTitle(conversation)">
+        <div *ngIf="conversation.unreadMessagesCount > 0" class="unread-indicator">
+          {{ conversation.unreadMessagesCount > 99 ? '99+' : conversation.unreadMessagesCount }}
+        </div>
+      </div>
+      
+      <div class="conversation-content">
+        <div class="conversation-header">
+          <h3 class="conversation-title">{{ getConversationTitle(conversation) }}</h3>
+          <span class="conversation-time">{{ getTimeAgo(conversation.lastMessageTime) }}</span>
+        </div>
+        
+        <div class="conversation-preview">
+          <span class="last-sender" *ngIf="conversation.lastMessageSender">
+            {{ conversation.lastMessageSender }}:
+          </span>
+          <span class="last-message">{{ getLastMessagePreview(conversation) }}</span>
+        </div>
+        
+        <div class="conversation-meta">
+          <span class="conversation-type">
+            <i [class]="conversation.conversationType === 'Private' ? 'icon-user' : 'icon-users'"></i>
+            {{ conversation.conversationType === 'Private' ? 'Privata' : 'Gruppo' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="conversation-actions" (click)="$event.stopPropagation()">
+        <button *ngIf="conversation.unreadMessagesCount > 0" 
+                (click)="markAsRead(conversation.conversationId)"
+                class="btn btn-sm btn-outline"
+                title="Segna come letto">
+          <i class="icon-check"></i>
+        </button>
+        
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline dropdown-toggle">
+            <i class="icon-more"></i>
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item">
+              <i class="icon-pin"></i>
+              Fissa in alto
+            </button>
+            <button class="dropdown-item">
+              <i class="icon-archive"></i>
+              Archivia
+            </button>
+            <button class="dropdown-item danger">
+              <i class="icon-trash"></i>
+              Elimina
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="conversations.length === 0" class="empty-state">
+      <i class="icon-message-circle"></i>
+      <h3>Nessuna conversazione</h3>
+      <p>Inizia una nuova conversazione con i tuoi amici!</p>
+      <button routerLink="/friends" class="btn btn-primary">
+        Trova Amici
+      </button>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalCount > pageSize" class="pagination">
+    <button 
+      (click)="onPageChange(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      class="page-btn">
+      <i class="icon-arrow-left"></i>
+    </button>
+    
+    <button 
+      *ngFor="let page of getPages()"
+      (click)="onPageChange(page)"
+      [class.active]="page === currentPage"
+      class="page-btn">
+      {{ page }}
+    </button>
+    
+    <button 
+      (click)="onPageChange(currentPage + 1)"
+      [disabled]="currentPage * pageSize >= totalCount"
+      class="page-btn">
+      <i class="icon-arrow-right"></i>
+    </button>
+  </div>
+</div> 

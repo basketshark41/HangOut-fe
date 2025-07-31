@@ -1,0 +1,106 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">
+        <h1>HangOut</h1>
+        <p>Connettiti e partecipa agli eventi</p>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <h2>Accedi al tuo account</h2>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="icon-alert-circle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Email/Username Field -->
+      <div class="form-group">
+        <label for="emailOrUsername">Email o Username</label>
+        <div class="input-container">
+          <i class="icon-user input-icon"></i>
+          <input
+            id="emailOrUsername"
+            type="text"
+            formControlName="emailOrUsername"
+            placeholder="Inserisci email o username"
+            [class.error]="isFieldInvalid('emailOrUsername')"
+            autocomplete="username">
+        </div>
+        <div *ngIf="isFieldInvalid('emailOrUsername')" class="field-error">
+          {{ getFieldError('emailOrUsername') }}
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-container">
+          <i class="icon-lock input-icon"></i>
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Inserisci la password"
+            [class.error]="isFieldInvalid('password')"
+            autocomplete="current-password">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            aria-label="Toggle password visibility">
+            <i [class]="showPassword ? 'icon-eye-off' : 'icon-eye'"></i>
+          </button>
+        </div>
+        <div *ngIf="isFieldInvalid('password')" class="field-error">
+          {{ getFieldError('password') }}
+        </div>
+      </div>
+
+      <!-- Forgot Password Link -->
+      <div class="forgot-password">
+        <a href="#" class="forgot-link">Password dimenticata?</a>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="login-btn"
+        [disabled]="loading || loginForm.invalid">
+        <span *ngIf="!loading">Accedi</span>
+        <span *ngIf="loading" class="loading-content">
+          <i class="icon-loader spinning"></i>
+          Accesso in corso...
+        </span>
+      </button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>oppure</span>
+      </div>
+
+      <!-- Register Link -->
+      <div class="register-link">
+        <p>Non hai un account?
+          <a routerLink="/register" class="register-btn">Registrati</a>
+        </p>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>&copy; 2024 HangOut. Tutti i diritti riservati.</p>
+    </div>
+  </div>
+
+  <!-- Background Image/Pattern -->
+  <div class="background-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+  </div>
+</div> 

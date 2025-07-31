@@ -1,0 +1,12 @@
+.main-content {
+  padding-top: 70px; /* Space for fixed navbar */
+  min-height: calc(100vh - 70px);
+  background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 60px; /* Smaller navbar on mobile */
+    min-height: calc(100vh - 60px);
+  }
+}
